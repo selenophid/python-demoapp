@@ -1,0 +1,32 @@
+pipeline {
+    agent any
+
+    stages {
+        stage('Git Checkout') {
+            steps {
+                git 'https://github.com/selenophid/python-demoapp.git'
+            }
+        }
+        stage('docker build') {
+            steps {
+                sh "make image"
+            }
+        }
+        stage('docker push') {
+            steps {
+                withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                    sh "make push"
+                }
+            }
+        }
+        stage('docker deploy') {
+            steps {
+                withDockerRegistry(credentialsId: 'docker', toolName: 'docker') {
+                    sh "docker run -d --rm -it -p 5000:5000 alinabagwan12345/python-demoapp:latest"
+                }
+            }
+        }
+        
+        
+    }
+}
